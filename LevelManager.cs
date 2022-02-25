@@ -10,6 +10,7 @@ namespace NotSoSimpleLevelDesigner
         //Fields
         private string filepath;
         private StreamWriter output;
+        private StreamReader input;
 
         //Constructor
         public LevelManager(string filepath)
@@ -40,6 +41,47 @@ namespace NotSoSimpleLevelDesigner
             {
                 output.Close();
                 Console.WriteLine("Error saving file.");
+            }
+        }
+
+        public bool LoadFile(out char[,] level, out int rows, out int columns)
+        {
+            string line;
+            string[] data;
+
+            try
+            {
+                input = new StreamReader(filepath);
+
+                //Get number of rows and columns
+                line = input.ReadLine();
+                data = line.Split(',');
+                level = new char[int.Parse(data[0]), int.Parse(data[1])];
+                rows = int.Parse(data[0]);
+                columns = int.Parse(data[1]);
+
+                //Load 2D array into level
+                line = input.ReadLine();
+                for (int row = 0; row < level.GetLength(0); row++)
+                {
+                    for (int column = 0; column < level.GetLength(1); column++)
+                    {
+                        level[row, column] = line[column];
+                    }
+                    line = input.ReadLine();
+                }
+
+                input.Close();
+                return true;
+            }
+            catch (Exception)
+            {
+                input.Close();
+                Console.WriteLine("Error loading file.");
+                level = null;
+                rows = 0;
+                columns = 0;
+                return false;
             }
         }
     }

@@ -38,7 +38,7 @@ namespace NotSoSimpleLevelDesigner
         */
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        private int tileSize;
+        private int tileSize = 16;
         private string userInput;
         private int columns;
         private int rows;
@@ -52,6 +52,7 @@ namespace NotSoSimpleLevelDesigner
         private KeyboardState prevKb;
         private MouseState mouseState;
         private Point maxMouse;
+        private bool hasSelectedSource = false;
         private string welcome = @"   _____                   _        _   Welcome to the   _   _____            _
   / ____\     (not so)    | |      | |                  | | |  __ \          (_)                      
  | (___  _ _ __ ___  _ __ | | ___  | |     _____   _____| | | |  | | ___  ___ _  __ _ _ __   ___ _ __ 
@@ -155,30 +156,50 @@ namespace NotSoSimpleLevelDesigner
             Console.WriteLine(welcome + "\n");
 
             System.IO.Directory.CreateDirectory("levels"); //Create levels directory if it doesn't exist
+            do
+            {
+                Console.Write("(G)enerate or (L)oad> ");
+                userInput = Console.ReadLine().Trim().ToUpper();
 
-            //Set level file
-            Console.Write("Level Name> ");
-            userInput = Console.ReadLine();
-            filepath = "levels\\" + userInput + ".sslvl";
+                switch (userInput)
+                {
+                    case "G":
+                        //Set level file
+                        Console.Write("level name> ");
+                        userInput = Console.ReadLine();
+                        filepath = "levels\\" + userInput + ".sslvl";
 
-            //Get width of room in tiles
-            Console.Write("width> ");
-            userInput = Console.ReadLine();
-            columns = int.Parse(userInput);
+                        //Get width of room in tiles
+                        Console.Write("width> ");
+                        userInput = Console.ReadLine();
+                        columns = int.Parse(userInput);
 
-            //Get height of room in tiles
-            Console.Write("height> ");
-            userInput = Console.ReadLine();
-            rows = int.Parse(userInput);
+                        //Get height of room in tiles
+                        Console.Write("height> ");
+                        userInput = Console.ReadLine();
+                        rows = int.Parse(userInput);
 
-            //Get height of room in tiles
-            Console.Write("tile size> ");
-            userInput = Console.ReadLine();
-            tileSize = int.Parse(userInput);
+                        //Get height of room in tiles
+                        Console.Write("tile size> ");
+                        userInput = Console.ReadLine();
+                        tileSize = int.Parse(userInput);
 
-            level = new char[rows, columns];
-            levelManager = new LevelManager(filepath);
-            GenerateWalls();
+                        level = new char[rows, columns];
+                        levelManager = new LevelManager(filepath);
+                        GenerateWalls();
+                        hasSelectedSource = true;
+                        break;
+
+                    case "L":
+                        Console.Write("filepath> ");
+                        userInput = Console.ReadLine();
+                        levelManager = new LevelManager("levels\\" + userInput + ".sslvl");
+                        hasSelectedSource = levelManager.LoadFile(out level, out rows, out columns);
+                        break;
+                }
+
+            }
+            while (!hasSelectedSource);
 
             //Display key to user
             Console.WriteLine("\nKey:\n\n" +
