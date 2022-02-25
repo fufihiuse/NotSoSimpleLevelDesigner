@@ -116,24 +116,36 @@ namespace NotSoSimpleLevelDesigner
             if(mouseState.LeftButton == ButtonState.Pressed)
             {
                 //Snap to tile
-                Point mousePosition = new Point(
-                    ((int)mouseState.X / tileSize),
-                    ((int)mouseState.Y / tileSize));
+                int x = Math.Clamp(
+                        ((int)mouseState.X / tileSize),
+                        0,
+                        maxMouse.X / tileSize - 1);
 
-                //Make sure program won't crash if OOB
-                if(mousePosition.X <= maxMouse.X && mousePosition.Y <= maxMouse.Y && mousePosition.X >= 0 && mousePosition.Y >= 0)
-                    level[mousePosition.Y, mousePosition.X] = c;
+                int y = Math.Clamp(
+                        ((int)mouseState.Y / tileSize),
+                        0,
+                        maxMouse.Y / tileSize - 1);
+                Point mousePosition = new Point(x, y);
+
+                //Update level array
+                level[mousePosition.Y, mousePosition.X] = c;
             }
             if(mouseState.RightButton == ButtonState.Pressed)
             {
                 //Snap to tile
-                Point mousePosition = new Point(
-                    ((int)mouseState.X / tileSize),
-                    ((int)mouseState.Y / tileSize));
+                int x = Math.Clamp(
+                        ((int)mouseState.X / tileSize),
+                        0,
+                        maxMouse.X / tileSize - 1);
 
-                //Make sure program won't crash if OOB
-                if (mousePosition.X <= maxMouse.X && mousePosition.Y <= maxMouse.Y && mousePosition.X >= 0 && mousePosition.Y >= 0)
-                    level[mousePosition.Y, mousePosition.X] = '0';
+                int y = Math.Clamp(
+                        ((int)mouseState.Y / tileSize),
+                        0,
+                        maxMouse.Y / tileSize - 1);
+                Point mousePosition = new Point(x, y);
+
+                //Update level array
+                level[mousePosition.Y, mousePosition.X] = '0';
             }
         }
 
@@ -168,6 +180,16 @@ namespace NotSoSimpleLevelDesigner
             levelManager = new LevelManager(filepath);
             GenerateWalls();
 
+            //Display key to user
+            Console.WriteLine("\nKey:\n\n" +
+                "W - Wall Editor\n" +
+                "I - Invis Wall\n" +
+                "M - Mirror\n" +
+                "E - Enemy\n" +
+                "P - Player\n");
+
+            //Flavor
+            Console.WriteLine("Entering Wall editor");
             base.Initialize();
         }
 
@@ -175,7 +197,7 @@ namespace NotSoSimpleLevelDesigner
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             gameObjectTexture = Content.Load<Texture2D>("gameObject");
-            maxMouse = new Point(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            maxMouse = new Point(columns * tileSize, rows * tileSize);
             // TODO: use this.Content to load your game content here
         }
 
