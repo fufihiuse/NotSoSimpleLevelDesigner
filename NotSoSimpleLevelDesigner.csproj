@@ -9,6 +9,8 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Icon.ico</ApplicationIcon>
     <StartupObject />
+    <Authors>Jackson Majewski</Authors>
+    <Company>Team Ellipses</Company>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Icon.ico" />
