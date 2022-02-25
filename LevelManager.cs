@@ -34,6 +34,7 @@ namespace NotSoSimpleLevelDesigner
                     output.WriteLine();
                 }
                 output.Close();
+                Console.WriteLine("Saved!");
             }
             catch (Exception)
             {

@@ -6,12 +6,14 @@ using Microsoft.Xna.Framework.Input;
 
 namespace NotSoSimpleLevelDesigner
 {
+    /*
     public enum ProgramState
     {
         Setup,
         Edit,
         Done
     }
+    */
     public enum EditorState
     {
         Walls,
@@ -36,15 +38,21 @@ namespace NotSoSimpleLevelDesigner
         */
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-
-        //Variables
-        string userInput;
-        int columns;
-        int rows;
-        string filepath;
-        char[,] level;
-        LevelManager levelManager;
-        string welcome = @"   _____                   _        _   Welcome to the   _   _____            _
+        private int tileSize;
+        private string userInput;
+        private int columns;
+        private int rows;
+        private string filepath;
+        private char[,] level;
+        private LevelManager levelManager;
+        Texture2D gameObjectTexture;
+        //private ProgramState programState = ProgramState.Edit;
+        private EditorState editorState = EditorState.Walls;
+        private KeyboardState kbState;
+        private KeyboardState prevKb;
+        private MouseState mouseState;
+        private Point maxMouse;
+        private string welcome = @"   _____                   _        _   Welcome to the   _   _____            _
   / ____\     (not so)    | |      | |                  | | |  __ \          (_)                      
  | (___  _ _ __ ___  _ __ | | ___  | |     _____   _____| | | |  | | ___  ___ _  __ _ _ __   ___ _ __ 
   \___ \| | '_ ` _ \| '_ \| |/ _ \ | |    / _ \ \ / / _ \ | | |  | |/ _ \/ __| |/ _` | '_ \ / _ \ '__|
@@ -61,6 +69,9 @@ namespace NotSoSimpleLevelDesigner
             IsMouseVisible = true;
         }
 
+        /// <summary>
+        /// Generates walls of specified width and height
+        /// </summary>
         public void GenerateWalls()
         {
             //Top row
@@ -86,6 +97,46 @@ namespace NotSoSimpleLevelDesigner
 
         }
 
+        /// <summary>
+        /// Helper method to avoid frame perfect input
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public bool IsValidKeypress(Keys key)
+        {
+            return (kbState.IsKeyDown(key) && !prevKb.IsKeyDown(key));
+        }
+
+        /// <summary>
+        /// Helper method to handle input and convert from pixel point to array address
+        /// </summary>
+        /// <param name="c"></param>
+        public void HandleMouseInput(char c)
+        {
+            if(mouseState.LeftButton == ButtonState.Pressed)
+            {
+                //Snap to tile
+                Point mousePosition = new Point(
+                    ((int)mouseState.X / tileSize),
+                    ((int)mouseState.Y / tileSize));
+
+                //Make sure program won't crash if OOB
+                if(mousePosition.X <= maxMouse.X && mousePosition.Y <= maxMouse.Y && mousePosition.X >= 0 && mousePosition.Y >= 0)
+                    level[mousePosition.Y, mousePosition.X] = c;
+            }
+            if(mouseState.RightButton == ButtonState.Pressed)
+            {
+                //Snap to tile
+                Point mousePosition = new Point(
+                    ((int)mouseState.X / tileSize),
+                    ((int)mouseState.Y / tileSize));
+
+                //Make sure program won't crash if OOB
+                if (mousePosition.X <= maxMouse.X && mousePosition.Y <= maxMouse.Y && mousePosition.X >= 0 && mousePosition.Y >= 0)
+                    level[mousePosition.Y, mousePosition.X] = '0';
+            }
+        }
+
         protected override void Initialize()
         {
             //Print welcome message
@@ -108,10 +159,14 @@ namespace NotSoSimpleLevelDesigner
             userInput = Console.ReadLine();
             rows = int.Parse(userInput);
 
+            //Get height of room in tiles
+            Console.Write("tile size> ");
+            userInput = Console.ReadLine();
+            tileSize = int.Parse(userInput);
+
             level = new char[rows, columns];
             levelManager = new LevelManager(filepath);
             GenerateWalls();
-            levelManager.SaveFile(level);
 
             base.Initialize();
         }
@@ -119,26 +174,205 @@ namespace NotSoSimpleLevelDesigner
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            gameObjectTexture = Content.Load<Texture2D>("gameObject");
+            maxMouse = new Point(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
             // TODO: use this.Content to load your game content here
         }
 
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            {
+                levelManager.SaveFile(level);
                 Exit();
+            }
 
-            // TODO: Add your update logic here
+            //Get input states
+            kbState = Keyboard.GetState();
+            mouseState = Mouse.GetState();
 
+            //Check whether to save
+            if (IsValidKeypress(Keys.S))
+            {
+                Console.WriteLine("Saving to file...");
+                levelManager.SaveFile(level);
+            }
+
+            //FSM for EditorState
+            switch (editorState)
+            {
+                case EditorState.Walls:
+
+                    //Change state
+                    if (IsValidKeypress(Keys.I))
+                    {
+                        Console.WriteLine("Entering Invisible Wall editor");
+                        editorState = EditorState.InvisibleWalls;
+                    }
+                    if (IsValidKeypress(Keys.M))
+                    {
+                        Console.WriteLine("Entering Mirror editor");
+                        editorState = EditorState.Mirrors;
+                    }
+                    if (IsValidKeypress(Keys.E))
+                    {
+                        Console.WriteLine("Entering Enemy editor");
+                        editorState = EditorState.Enemies;
+                    }
+                    if (IsValidKeypress(Keys.P))
+                    {
+                        Console.WriteLine("Entering Player editor");
+                        editorState = EditorState.Player;
+                    }
+                    HandleMouseInput('W');
+                    break;
+
+                case EditorState.InvisibleWalls:
+
+                    //Change state
+                    if (IsValidKeypress(Keys.W))
+                    {
+                        Console.WriteLine("Entering Wall editor");
+                        editorState = EditorState.Walls;
+                    }
+                    if (IsValidKeypress(Keys.M))
+                    {
+                        Console.WriteLine("Entering Mirror editor");
+                        editorState = EditorState.Mirrors;
+                    }
+                    if (IsValidKeypress(Keys.E))
+                    {
+                        Console.WriteLine("Entering Enemy editor");
+                        editorState = EditorState.Enemies;
+                    }
+                    if (IsValidKeypress(Keys.P))
+                    {
+                        Console.WriteLine("Entering Player editor");
+                        editorState = EditorState.Player;
+                    }
+                    HandleMouseInput('I');
+                    break;
+
+                case EditorState.Mirrors:
+
+                    //Change state
+                    if (IsValidKeypress(Keys.W))
+                    {
+                        Console.WriteLine("Entering Wall editor");
+                        editorState = EditorState.Walls;
+                    }
+                    if (IsValidKeypress(Keys.I))
+                    {
+                        Console.WriteLine("Entering Invisible Wall editor");
+                        editorState = EditorState.InvisibleWalls;
+                    }
+                    if (IsValidKeypress(Keys.E))
+                    {
+                        Console.WriteLine("Entering Enemy editor");
+                        editorState = EditorState.Enemies;
+                    }
+                    if (IsValidKeypress(Keys.P))
+                    {
+                        Console.WriteLine("Entering Player editor");
+                        editorState = EditorState.Player;
+                    }
+                    HandleMouseInput('M');
+                    break;
+
+                case EditorState.Enemies:
+
+                    //Change state
+                    if (IsValidKeypress(Keys.W))
+                    {
+                        Console.WriteLine("Entering Wall editor");
+                        editorState = EditorState.Walls;
+                    }
+                    if (IsValidKeypress(Keys.I))
+                    {
+                        Console.WriteLine("Entering Invisible Wall editor");
+                        editorState = EditorState.InvisibleWalls;
+                    }
+                    if (IsValidKeypress(Keys.M))
+                    {
+                        Console.WriteLine("Entering Mirror editor");
+                        editorState = EditorState.Mirrors;
+                    }
+                    if (IsValidKeypress(Keys.P))
+                    {
+                        Console.WriteLine("Entering Player editor");
+                        editorState = EditorState.Player;
+                    }
+                    HandleMouseInput('E');
+                    break;
+
+                case EditorState.Player:
+
+                    //Change state
+                    if (IsValidKeypress(Keys.W))
+                    {
+                        Console.WriteLine("Entering Wall editor");
+                        editorState = EditorState.Walls;
+                    }
+                    if (IsValidKeypress(Keys.I))
+                    {
+                        Console.WriteLine("Entering Invisible Wall editor");
+                        editorState = EditorState.InvisibleWalls;
+                    }
+                    if (IsValidKeypress(Keys.M))
+                    {
+                        Console.WriteLine("Entering Mirror editor");
+                        editorState = EditorState.Mirrors;
+                    }
+                    if (IsValidKeypress(Keys.E))
+                    {
+                        Console.WriteLine("Entering Enemy editor");
+                        editorState = EditorState.Enemies;
+                    }
+                    HandleMouseInput('P');
+                    break;
+            }
+            prevKb = kbState;
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
 
             // TODO: Add your drawing code here
+            _spriteBatch.Begin();
 
+            for(int i = 0; i < rows; i++)
+            {
+                for(int j = 0; j < columns; j++)
+                {
+                    //Check what to draw
+                    switch(level[i, j])
+                    {
+                        case 'W':
+                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * 16, i * 16, 16, 16), Color.White);
+                            break;
+
+                        case 'P':
+                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * 16, i * 16, 16, 16), Color.Purple);
+                            break;
+
+                        case 'I':
+                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * 16, i * 16, 16, 16), Color.Blue);
+                            break;
+
+                        case 'M':
+                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * 16, i * 16, 16, 16), Color.Green);
+                            break;
+
+                        case 'E':
+                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * 16, i * 16, 16, 16), Color.DarkRed);
+                            break;
+                    }
+                }
+            }
+
+            _spriteBatch.End();
             base.Draw(gameTime);
         }
     }
