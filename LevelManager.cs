@@ -76,8 +76,9 @@ namespace NotSoSimpleLevelDesigner
             }
             catch (Exception)
             {
-                input.Close();
-                Console.WriteLine("Error loading file.");
+                if(input != null)
+                    input.Close();
+                Console.WriteLine("Error loading file.\n");
                 level = null;
                 rows = 0;
                 columns = 0;
