@@ -46,6 +46,7 @@ namespace NotSoSimpleLevelDesigner
         private char[,] level;
         private LevelManager levelManager;
         Texture2D gameObjectTexture;
+        Texture2D gridTexture;
         //private ProgramState programState = ProgramState.Edit;
         private EditorState editorState = EditorState.Walls;
         private KeyboardState kbState;
@@ -218,6 +219,7 @@ namespace NotSoSimpleLevelDesigner
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             gameObjectTexture = Content.Load<Texture2D>("gameObject");
+            gridTexture = Content.Load<Texture2D>("grid");
             maxMouse = new Point(columns * tileSize, rows * tileSize);
             // TODO: use this.Content to load your game content here
         }
@@ -390,7 +392,7 @@ namespace NotSoSimpleLevelDesigner
                 for(int j = 0; j < columns; j++)
                 {
                     //Check what to draw
-                    switch(level[i, j])
+                    switch (level[i, j])
                     {
                         case 'W':
                             _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * 16, i * 16, 16, 16), Color.White);
@@ -412,6 +414,7 @@ namespace NotSoSimpleLevelDesigner
                             _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * 16, i * 16, 16, 16), Color.DarkRed);
                             break;
                     }
+                    _spriteBatch.Draw(gridTexture, new Rectangle(j * 16, i * 16, 16, 16), Color.White); //Draw grid
                 }
             }
 
