@@ -6,14 +6,6 @@ using Microsoft.Xna.Framework.Input;
 
 namespace NotSoSimpleLevelDesigner
 {
-    /*
-    public enum ProgramState
-    {
-        Setup,
-        Edit,
-        Done
-    }
-    */
     public enum EditorState
     {
         Walls,
@@ -46,13 +38,14 @@ namespace NotSoSimpleLevelDesigner
         private char[,] level;
         private LevelManager levelManager;
         Texture2D gameObjectTexture;
-        //private ProgramState programState = ProgramState.Edit;
+        Texture2D gridTexture;
         private EditorState editorState = EditorState.Walls;
         private KeyboardState kbState;
         private KeyboardState prevKb;
         private MouseState mouseState;
         private Point maxMouse;
         private bool hasSelectedSource = false;
+        private bool hasGrid = true;
         private string welcome = @"   _____                   _        _   Welcome to the   _   _____            _
   / ____\     (not so)    | |      | |                  | | |  __ \          (_)                      
  | (___  _ _ __ ___  _ __ | | ___  | |     _____   _____| | | |  | | ___  ___ _  __ _ _ __   ___ _ __ 
@@ -60,7 +53,7 @@ namespace NotSoSimpleLevelDesigner
   ____) | | | | | | | |_) | |  __/ | |___|  __/\ V /  __/ | | |__| |  __/\__ \ | (_| | | | |  __/ |   
  |_____/|_|_| |_| |_| .__/|_|\___| |______\___| \_/ \___|_| |_____/ \___||___/_|\__, |_| |_|\___|_|   
                     | |                                                          __/ |                   
-                    |_|               by Jackson Majewski                       |___/        v1.1.0     
+                    |_|               by Jackson Majewski                       |___/        v1.2.0     
 ";
 
         public Game1()
@@ -126,10 +119,9 @@ namespace NotSoSimpleLevelDesigner
                         ((int)mouseState.Y / tileSize),
                         0,
                         maxMouse.Y / tileSize - 1);
-                Point mousePosition = new Point(x, y);
 
                 //Update level array
-                level[mousePosition.Y, mousePosition.X] = c;
+                level[y, x] = c;
             }
             if(mouseState.RightButton == ButtonState.Pressed)
             {
@@ -172,17 +164,20 @@ namespace NotSoSimpleLevelDesigner
                         //Get width of room in tiles
                         Console.Write("width> ");
                         userInput = Console.ReadLine();
-                        columns = int.Parse(userInput);
+                        if (!int.TryParse(userInput, out columns))
+                            columns = 50;
 
                         //Get height of room in tiles
                         Console.Write("height> ");
                         userInput = Console.ReadLine();
-                        rows = int.Parse(userInput);
+                        if (!int.TryParse(userInput, out rows))
+                            rows = 30;
 
                         //Get height of room in tiles
                         Console.Write("tile size> ");
                         userInput = Console.ReadLine();
-                        tileSize = int.Parse(userInput);
+                        if (!int.TryParse(userInput, out tileSize))
+                            tileSize = 16;
 
                         level = new char[rows, columns];
                         levelManager = new LevelManager(filepath);
@@ -204,10 +199,11 @@ namespace NotSoSimpleLevelDesigner
             //Display key to user
             Console.WriteLine("\nKey:\n\n" +
                 "W - Wall Editor\n" +
-                "I - Invis Wall\n" +
-                "M - Mirror\n" +
-                "E - Enemy\n" +
-                "P - Player\n");
+                "I - Invis Wall Editor\n" +
+                "M - Mirror Editor\n" +
+                "E - Enemy Editor\n" +
+                "P - Player Editor\n" +
+                "G - Toggle Grid");
 
             //Flavor
             Console.WriteLine("Entering Wall editor");
@@ -218,6 +214,7 @@ namespace NotSoSimpleLevelDesigner
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             gameObjectTexture = Content.Load<Texture2D>("gameObject");
+            gridTexture = Content.Load<Texture2D>("grid");
             maxMouse = new Point(columns * tileSize, rows * tileSize);
             // TODO: use this.Content to load your game content here
         }
@@ -239,6 +236,22 @@ namespace NotSoSimpleLevelDesigner
             {
                 Console.WriteLine("Saving to file...");
                 levelManager.SaveFile(level);
+            }
+
+            //Check grid
+            if (IsValidKeypress(Keys.G))
+            {
+                if (hasGrid)
+                {
+                    Console.WriteLine("Grid disabled");
+                    hasGrid = false;
+                }
+                else
+                {
+                    Console.WriteLine("Grid enabled");
+                    hasGrid = true;
+                }
+                
             }
 
             //FSM for EditorState
@@ -390,31 +403,37 @@ namespace NotSoSimpleLevelDesigner
                 for(int j = 0; j < columns; j++)
                 {
                     //Check what to draw
-                    switch(level[i, j])
+                    switch (level[i, j])
                     {
                         case 'W':
-                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * 16, i * 16, 16, 16), Color.White);
+                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.White);
                             break;
 
                         case 'P':
-                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * 16, i * 16, 16, 16), Color.Purple);
+                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.Purple);
                             break;
 
                         case 'I':
-                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * 16, i * 16, 16, 16), Color.Blue);
+                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.Blue);
                             break;
 
                         case 'M':
-                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * 16, i * 16, 16, 16), Color.Green);
+                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.Green);
                             break;
 
                         case 'E':
-                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * 16, i * 16, 16, 16), Color.DarkRed);
+                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.DarkRed);
                             break;
+                    }
+
+                    //Draw grid
+                    if (hasGrid)
+                    {
+                        //For some reason this won't draw if the tileSize isn't 16, but everthing else does i feel like I'm going insane
+                        _spriteBatch.Draw(gridTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.White);
                     }
                 }
             }
-
             _spriteBatch.End();
             base.Draw(gameTime);
         }
