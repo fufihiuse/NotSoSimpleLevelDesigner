@@ -11,7 +11,8 @@ namespace NotSoSimpleLevelDesigner
         Walls,
         InvisibleWalls,
         Mirrors,
-        Enemies,
+        Homing,
+        Ensconcing,
         Player
     }
 
@@ -26,6 +27,8 @@ namespace NotSoSimpleLevelDesigner
         * M - Mirror
         * E - Enemy
         * P - Player
+        * G - Toggle Grid
+        * S - Save
         * 
         */
         private GraphicsDeviceManager _graphics;
@@ -53,7 +56,7 @@ namespace NotSoSimpleLevelDesigner
   ____) | | | | | | | |_) | |  __/ | |___|  __/\ V /  __/ | | |__| |  __/\__ \ | (_| | | | |  __/ |   
  |_____/|_|_| |_| |_| .__/|_|\___| |______\___| \_/ \___|_| |_____/ \___||___/_|\__, |_| |_|\___|_|   
                     | |                                                          __/ |                   
-                    |_|               by Jackson Majewski                       |___/        v1.2.0     
+                    |_|               by Jackson Majewski                       |___/        v1.3.0     
 ";
 
         public Game1()
@@ -201,9 +204,11 @@ namespace NotSoSimpleLevelDesigner
                 "W - Wall Editor\n" +
                 "I - Invis Wall Editor\n" +
                 "M - Mirror Editor\n" +
-                "E - Enemy Editor\n" +
+                "H - Homing Enemy Editor\n" +
+                "E - Ensconcing Enemy Editor\n" +
                 "P - Player Editor\n" +
-                "G - Toggle Grid");
+                "G - Toggle Grid\n" +
+                "S - Save");
 
             //Flavor
             Console.WriteLine("Entering Wall editor");
@@ -272,8 +277,13 @@ namespace NotSoSimpleLevelDesigner
                     }
                     if (IsValidKeypress(Keys.E))
                     {
-                        Console.WriteLine("Entering Enemy editor");
-                        editorState = EditorState.Enemies;
+                        Console.WriteLine("Entering Ensconcing Enemy editor");
+                        editorState = EditorState.Ensconcing;
+                    }
+                    if (IsValidKeypress(Keys.H))
+                    {
+                        Console.WriteLine("Entering Homing Enemy editor");
+                        editorState = EditorState.Homing;
                     }
                     if (IsValidKeypress(Keys.P))
                     {
@@ -298,8 +308,13 @@ namespace NotSoSimpleLevelDesigner
                     }
                     if (IsValidKeypress(Keys.E))
                     {
-                        Console.WriteLine("Entering Enemy editor");
-                        editorState = EditorState.Enemies;
+                        Console.WriteLine("Entering Ensconcing Enemy editor");
+                        editorState = EditorState.Ensconcing;
+                    }
+                    if (IsValidKeypress(Keys.H))
+                    {
+                        Console.WriteLine("Entering Homing Enemy editor");
+                        editorState = EditorState.Homing;
                     }
                     if (IsValidKeypress(Keys.P))
                     {
@@ -324,8 +339,13 @@ namespace NotSoSimpleLevelDesigner
                     }
                     if (IsValidKeypress(Keys.E))
                     {
-                        Console.WriteLine("Entering Enemy editor");
-                        editorState = EditorState.Enemies;
+                        Console.WriteLine("Entering Ensconcing Enemy editor");
+                        editorState = EditorState.Ensconcing;
+                    }
+                    if (IsValidKeypress(Keys.H))
+                    {
+                        Console.WriteLine("Entering Homing Enemy editor");
+                        editorState = EditorState.Homing;
                     }
                     if (IsValidKeypress(Keys.P))
                     {
@@ -335,7 +355,38 @@ namespace NotSoSimpleLevelDesigner
                     HandleMouseInput('M');
                     break;
 
-                case EditorState.Enemies:
+                case EditorState.Ensconcing:
+
+                    //Change state
+                    if (IsValidKeypress(Keys.W))
+                    {
+                        Console.WriteLine("Entering Wall editor");
+                        editorState = EditorState.Walls;
+                    }
+                    if (IsValidKeypress(Keys.I))
+                    {
+                        Console.WriteLine("Entering Invisible Wall editor");
+                        editorState = EditorState.InvisibleWalls;
+                    }
+                    if (IsValidKeypress(Keys.H))
+                    {
+                        Console.WriteLine("Entering Homing Enemy editor");
+                        editorState = EditorState.Homing;
+                    }
+                    if (IsValidKeypress(Keys.M))
+                    {
+                        Console.WriteLine("Entering Mirror editor");
+                        editorState = EditorState.Mirrors;
+                    }
+                    if (IsValidKeypress(Keys.P))
+                    {
+                        Console.WriteLine("Entering Player editor");
+                        editorState = EditorState.Player;
+                    }
+                    HandleMouseInput('E');
+                    break;
+
+                case EditorState.Homing:
 
                     //Change state
                     if (IsValidKeypress(Keys.W))
@@ -353,12 +404,17 @@ namespace NotSoSimpleLevelDesigner
                         Console.WriteLine("Entering Mirror editor");
                         editorState = EditorState.Mirrors;
                     }
+                    if (IsValidKeypress(Keys.E))
+                    {
+                        Console.WriteLine("Entering Ensconcing Enemy editor");
+                        editorState = EditorState.Ensconcing;
+                    }
                     if (IsValidKeypress(Keys.P))
                     {
                         Console.WriteLine("Entering Player editor");
                         editorState = EditorState.Player;
                     }
-                    HandleMouseInput('E');
+                    HandleMouseInput('H');
                     break;
 
                 case EditorState.Player:
@@ -381,8 +437,13 @@ namespace NotSoSimpleLevelDesigner
                     }
                     if (IsValidKeypress(Keys.E))
                     {
-                        Console.WriteLine("Entering Enemy editor");
-                        editorState = EditorState.Enemies;
+                        Console.WriteLine("Entering Ensconcing Enemy editor");
+                        editorState = EditorState.Ensconcing;
+                    }
+                    if (IsValidKeypress(Keys.H))
+                    {
+                        Console.WriteLine("Entering Homing Enemy editor");
+                        editorState = EditorState.Homing;
                     }
                     HandleMouseInput('P');
                     break;
@@ -422,6 +483,10 @@ namespace NotSoSimpleLevelDesigner
                             break;
 
                         case 'E':
+                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.Orange);
+                            break;
+                        
+                        case 'H':
                             _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.DarkRed);
                             break;
                     }
