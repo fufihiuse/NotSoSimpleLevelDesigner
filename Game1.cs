@@ -259,6 +259,23 @@ namespace NotSoSimpleLevelDesigner
                 
             }
 
+            //Check if 
+            if (IsValidKeypress(Keys.Left) && level[0, 0] == '0' && level[level.GetLength(0), 0] == '0' && level[(int)level.GetLength(0) / 2, 0] == '0')
+            {
+                char[,] tempArray = new char[level.GetLength(0) - 1, level.GetLength(1)];
+
+                for(int i = 0; i < level.GetLength(0); i++)
+                {
+                    for (int j = 1; j < level.GetLength(1); j++)
+                    {
+                        tempArray[i, j] = level[i, j];
+                        columns--;
+                        level = tempArray;
+                    }
+                }
+
+            }
+
             //FSM for EditorState
             switch (editorState)
             {
