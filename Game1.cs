@@ -29,6 +29,7 @@ namespace NotSoSimpleLevelDesigner
         * P - Player
         * G - Toggle Grid
         * S - Save
+        * Arrow Keys - Move Level
         * 
         */
         private GraphicsDeviceManager _graphics;
@@ -56,7 +57,7 @@ namespace NotSoSimpleLevelDesigner
   ____) | | | | | | | |_) | |  __/ | |___|  __/\ V /  __/ | | |__| |  __/\__ \ | (_| | | | |  __/ |   
  |_____/|_|_| |_| |_| .__/|_|\___| |______\___| \_/ \___|_| |_____/ \___||___/_|\__, |_| |_|\___|_|   
                     | |                                                          __/ |                   
-                    |_|               by Jackson Majewski                       |___/        v1.3.0     
+                    |_|               by Jackson Majewski                       |___/        v1.4.0     
 ";
 
         public Game1()
@@ -208,7 +209,8 @@ namespace NotSoSimpleLevelDesigner
                 "E - Ensconcing Enemy Editor\n" +
                 "P - Player Editor\n" +
                 "G - Toggle Grid\n" +
-                "S - Save");
+                "S - Save" +
+                "Arrow Keys - Move Level");
 
             //Flavor
             Console.WriteLine("Entering Wall editor");
@@ -259,21 +261,84 @@ namespace NotSoSimpleLevelDesigner
                 
             }
 
-            //Check if 
-            if (IsValidKeypress(Keys.Left) && level[0, 0] == '0' && level[level.GetLength(0), 0] == '0' && level[(int)level.GetLength(0) / 2, 0] == '0')
+            //Check whether to move left, and if possible
+            if (IsValidKeypress(Keys.Left) && level[0, 0] == '0' && level[level.GetLength(0) - 1, 0] == '0' && level[((int)level.GetLength(0) - 1) / 2, 0] == '0')
+            {
+                char[,] tempArray = new char[level.GetLength(0), level.GetLength(1) - 1];
+
+                for(int i = 0; i < rows; i++)
+                {
+                    for (int j = 1; j < columns; j++)
+                    {
+                        tempArray[i, j - 1] = level[i, j];
+                    }
+                }
+                columns--;
+                maxMouse = new Point(columns * tileSize, rows * tileSize);
+                level = tempArray;
+            }
+
+            //Check whether to move right, and if possible
+            //TODO: fix bug where you can move it off the screen
+            if (IsValidKeypress(Keys.Right))
+            {
+                char[,] tempArray = new char[level.GetLength(0), level.GetLength(1) + 1];
+
+                for(int i = 0; i < rows; i++)
+                {
+                    tempArray[i, 0] = '0';
+                }
+
+                for (int i = 0; i < rows; i++)
+                {
+                    for (int j = 1; j < columns + 1; j++)
+                    {
+                        tempArray[i, j] = level[i, j - 1];
+                    }
+                }
+                columns++;
+                maxMouse = new Point(columns * tileSize, rows * tileSize);
+                level = tempArray;
+            }
+
+            //Check whether to move up, and if possible
+            if (IsValidKeypress(Keys.Up) && level[0, 0] == '0' && level[0, level.GetLength(1) - 1] == '0' && level[0, ((int)level.GetLength(1) - 1) / 2] == '0')
             {
                 char[,] tempArray = new char[level.GetLength(0) - 1, level.GetLength(1)];
 
-                for(int i = 0; i < level.GetLength(0); i++)
+                for (int i = 1; i < rows; i++)
                 {
-                    for (int j = 1; j < level.GetLength(1); j++)
+                    for (int j = 0; j < columns; j++)
                     {
-                        tempArray[i, j] = level[i, j];
-                        columns--;
-                        level = tempArray;
+                        tempArray[i - 1, j] = level[i, j];
                     }
                 }
+                rows--;
+                maxMouse = new Point(columns * tileSize, rows * tileSize);
+                level = tempArray;
+            }
 
+            //Check whether to move down, and if possible
+            //TODO: fix bug where you can move it off the screen
+            if (IsValidKeypress(Keys.Down))
+            {
+                char[,] tempArray = new char[level.GetLength(0) + 1, level.GetLength(1)];
+
+                for (int j = 0; j < columns; j++)
+                {
+                    tempArray[0, j] = '0';
+                }
+
+                for (int i = 1; i < rows + 1; i++)
+                {
+                    for (int j = 0; j < columns; j++)
+                    {
+                        tempArray[i, j] = level[i - 1, j];
+                    }
+                }
+                rows++;
+                maxMouse = new Point(columns * tileSize, rows * tileSize);
+                level = tempArray;
             }
 
             //FSM for EditorState
