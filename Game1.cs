@@ -209,7 +209,7 @@ namespace NotSoSimpleLevelDesigner
                 "E - Ensconcing Enemy Editor\n" +
                 "P - Player Editor\n" +
                 "G - Toggle Grid\n" +
-                "S - Save" +
+                "S - Save\n" +
                 "Arrow Keys - Move Level");
 
             //Flavor
