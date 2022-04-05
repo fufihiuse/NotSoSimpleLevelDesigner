@@ -9,7 +9,7 @@ namespace NotSoSimpleLevelDesigner
     public enum EditorState
     {
         Walls,
-        InvisibleWalls,
+        bulletOnlyWalls,
         Mirrors,
         Homing,
         Ensconcing,
@@ -23,7 +23,7 @@ namespace NotSoSimpleLevelDesigner
         * 
         * 0 - Empty
         * W - Wall
-        * I - Invisible Wall
+        * B - Bullet Only Wall (B.O.W.)
         * M - Mirror
         * E - Enemy
         * P - Player
@@ -57,7 +57,7 @@ namespace NotSoSimpleLevelDesigner
   ____) | | | | | | | |_) | |  __/ | |___|  __/\ V /  __/ | | |__| |  __/\__ \ | (_| | | | |  __/ |   
  |_____/|_|_| |_| |_| .__/|_|\___| |______\___| \_/ \___|_| |_____/ \___||___/_|\__, |_| |_|\___|_|   
                     | |                                                          __/ |                   
-                    |_|               by Jackson Majewski                       |___/        v1.4.0     
+                    |_|               by Jackson Majewski                       |___/        v1.4.1     
 ";
 
         public Game1()
@@ -203,7 +203,7 @@ namespace NotSoSimpleLevelDesigner
             //Display key to user
             Console.WriteLine("\nKey:\n\n" +
                 "W - Wall Editor\n" +
-                "I - Invis Wall Editor\n" +
+                "B - Bullet Only Wall Editor\n" +
                 "M - Mirror Editor\n" +
                 "H - Homing Enemy Editor\n" +
                 "E - Ensconcing Enemy Editor\n" +
@@ -347,10 +347,10 @@ namespace NotSoSimpleLevelDesigner
                 case EditorState.Walls:
 
                     //Change state
-                    if (IsValidKeypress(Keys.I))
+                    if (IsValidKeypress(Keys.B))
                     {
-                        Console.WriteLine("Entering Invisible Wall editor");
-                        editorState = EditorState.InvisibleWalls;
+                        Console.WriteLine("Entering B.O.W. editor");
+                        editorState = EditorState.bulletOnlyWalls;
                     }
                     if (IsValidKeypress(Keys.M))
                     {
@@ -375,7 +375,7 @@ namespace NotSoSimpleLevelDesigner
                     HandleMouseInput('W');
                     break;
 
-                case EditorState.InvisibleWalls:
+                case EditorState.bulletOnlyWalls:
 
                     //Change state
                     if (IsValidKeypress(Keys.W))
@@ -403,7 +403,7 @@ namespace NotSoSimpleLevelDesigner
                         Console.WriteLine("Entering Player editor");
                         editorState = EditorState.Player;
                     }
-                    HandleMouseInput('I');
+                    HandleMouseInput('B');
                     break;
 
                 case EditorState.Mirrors:
@@ -414,10 +414,10 @@ namespace NotSoSimpleLevelDesigner
                         Console.WriteLine("Entering Wall editor");
                         editorState = EditorState.Walls;
                     }
-                    if (IsValidKeypress(Keys.I))
+                    if (IsValidKeypress(Keys.B))
                     {
-                        Console.WriteLine("Entering Invisible Wall editor");
-                        editorState = EditorState.InvisibleWalls;
+                        Console.WriteLine("Entering B.O.W. editor");
+                        editorState = EditorState.bulletOnlyWalls;
                     }
                     if (IsValidKeypress(Keys.E))
                     {
@@ -445,10 +445,10 @@ namespace NotSoSimpleLevelDesigner
                         Console.WriteLine("Entering Wall editor");
                         editorState = EditorState.Walls;
                     }
-                    if (IsValidKeypress(Keys.I))
+                    if (IsValidKeypress(Keys.B))
                     {
-                        Console.WriteLine("Entering Invisible Wall editor");
-                        editorState = EditorState.InvisibleWalls;
+                        Console.WriteLine("Entering B.O.W. editor");
+                        editorState = EditorState.bulletOnlyWalls;
                     }
                     if (IsValidKeypress(Keys.H))
                     {
@@ -476,10 +476,10 @@ namespace NotSoSimpleLevelDesigner
                         Console.WriteLine("Entering Wall editor");
                         editorState = EditorState.Walls;
                     }
-                    if (IsValidKeypress(Keys.I))
+                    if (IsValidKeypress(Keys.B))
                     {
-                        Console.WriteLine("Entering Invisible Wall editor");
-                        editorState = EditorState.InvisibleWalls;
+                        Console.WriteLine("Entering B.O.W. editor");
+                        editorState = EditorState.bulletOnlyWalls;
                     }
                     if (IsValidKeypress(Keys.M))
                     {
@@ -507,10 +507,10 @@ namespace NotSoSimpleLevelDesigner
                         Console.WriteLine("Entering Wall editor");
                         editorState = EditorState.Walls;
                     }
-                    if (IsValidKeypress(Keys.I))
+                    if (IsValidKeypress(Keys.B))
                     {
-                        Console.WriteLine("Entering Invisible Wall editor");
-                        editorState = EditorState.InvisibleWalls;
+                        Console.WriteLine("Entering B.O.W. editor");
+                        editorState = EditorState.bulletOnlyWalls;
                     }
                     if (IsValidKeypress(Keys.M))
                     {
@@ -556,7 +556,7 @@ namespace NotSoSimpleLevelDesigner
                             _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.Purple);
                             break;
 
-                        case 'I':
+                        case 'B':
                             _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.Blue);
                             break;
 
