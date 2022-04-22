@@ -57,7 +57,7 @@ namespace NotSoSimpleLevelDesigner
   ____) | | | | | | | |_) | |  __/ | |___|  __/\ V /  __/ | | |__| |  __/\__ \ | (_| | | | |  __/ |   
  |_____/|_|_| |_| |_| .__/|_|\___| |______\___| \_/ \___|_| |_____/ \___||___/_|\__, |_| |_|\___|_|   
                     | |                                                          __/ |                   
-                    |_|               by Jackson Majewski                       |___/        v1.4.1     
+                    |_|               by Jackson Majewski                       |___/        v1.5.0     
 ";
 
         public Game1()
@@ -154,7 +154,7 @@ namespace NotSoSimpleLevelDesigner
             System.IO.Directory.CreateDirectory("levels"); //Create levels directory if it doesn't exist
             do
             {
-                Console.Write("(G)enerate or (L)oad> ");
+                Console.Write("(G)enerate, (L)oad, or (C)reate Custom Level file> ");
                 userInput = Console.ReadLine().Trim().ToUpper();
 
                 switch (userInput)
@@ -194,6 +194,43 @@ namespace NotSoSimpleLevelDesigner
                         userInput = Console.ReadLine();
                         levelManager = new LevelManager("levels\\" + userInput + ".sslvl");
                         hasSelectedSource = levelManager.LoadFile(out level, out rows, out columns);
+                        break;
+
+                    case "C":
+                        //Prompt
+                        Console.WriteLine("\nWelcome to the Custom Level File Generator!");
+                        Console.WriteLine("Enter the names of your levels below. When you are done, enter a blank line. \n(NOTE: THIS WILL OVERWRITE PREEXISTING LEVELINFO FILES IN THE LEVELS DIRECTORY)");
+                        Console.Write("> ");
+                        levelManager = new LevelManager("levels\\info.wal");
+
+                        string customLevelInfo = Console.ReadLine().Trim();
+
+                        //Check if exit case
+                        if(customLevelInfo == "")
+                        {
+                            break;
+                        }
+
+                        string currentLevelName;
+
+                        do
+                        {
+                            Console.Write("> ");
+                            currentLevelName = Console.ReadLine().Trim();
+
+                            //Check if exit case
+                            if (currentLevelName != "")
+                            {
+                                customLevelInfo += "," + currentLevelName;
+                            }
+                        }
+                        while (currentLevelName != "");
+
+                        if (levelManager.SaveCustomInfo(customLevelInfo))
+                        {
+                            Console.WriteLine("File successfully saved!");
+                        }
+
                         break;
                 }
 

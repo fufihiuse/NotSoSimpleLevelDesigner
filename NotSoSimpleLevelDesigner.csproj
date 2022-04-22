@@ -11,7 +11,7 @@
     <StartupObject />
     <Authors>Jackson Majewski</Authors>
     <Company>Team Ellipses</Company>
-    <Version>1.4.1</Version>
+    <Version>1.5.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Icon.ico" />

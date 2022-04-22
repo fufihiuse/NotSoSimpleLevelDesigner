@@ -44,6 +44,22 @@ namespace NotSoSimpleLevelDesigner
             }
         }
 
+        public bool SaveCustomInfo(string levelInfo)
+        {
+            try
+            {
+                output = new StreamWriter(filepath);
+                output.WriteLine(levelInfo);
+                output.Close();
+                return true;
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Error! File \"info.wal\" is already open!");
+                return false;
+            }
+        }
+
         public bool LoadFile(out char[,] level, out int rows, out int columns)
         {
             string line;
