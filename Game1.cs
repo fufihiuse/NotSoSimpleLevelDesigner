@@ -9,7 +9,7 @@ namespace NotSoSimpleLevelDesigner
     public enum EditorState
     {
         Walls,
-        InvisibleWalls,
+        bulletOnlyWalls,
         Mirrors,
         Homing,
         Ensconcing,
@@ -23,12 +23,13 @@ namespace NotSoSimpleLevelDesigner
         * 
         * 0 - Empty
         * W - Wall
-        * I - Invisible Wall
+        * B - Bullet Only Wall (B.O.W.)
         * M - Mirror
         * E - Enemy
         * P - Player
         * G - Toggle Grid
         * S - Save
+        * Arrow Keys - Move Level
         * 
         */
         private GraphicsDeviceManager _graphics;
@@ -56,7 +57,7 @@ namespace NotSoSimpleLevelDesigner
   ____) | | | | | | | |_) | |  __/ | |___|  __/\ V /  __/ | | |__| |  __/\__ \ | (_| | | | |  __/ |   
  |_____/|_|_| |_| |_| .__/|_|\___| |______\___| \_/ \___|_| |_____/ \___||___/_|\__, |_| |_|\___|_|   
                     | |                                                          __/ |                   
-                    |_|               by Jackson Majewski                       |___/        v1.3.0     
+                    |_|               by Jackson Majewski                       |___/        v1.5.0     
 ";
 
         public Game1()
@@ -153,7 +154,7 @@ namespace NotSoSimpleLevelDesigner
             System.IO.Directory.CreateDirectory("levels"); //Create levels directory if it doesn't exist
             do
             {
-                Console.Write("(G)enerate or (L)oad> ");
+                Console.Write("(G)enerate, (L)oad, or (C)reate Custom Level file> ");
                 userInput = Console.ReadLine().Trim().ToUpper();
 
                 switch (userInput)
@@ -194,6 +195,43 @@ namespace NotSoSimpleLevelDesigner
                         levelManager = new LevelManager("levels\\" + userInput + ".sslvl");
                         hasSelectedSource = levelManager.LoadFile(out level, out rows, out columns);
                         break;
+
+                    case "C":
+                        //Prompt
+                        Console.WriteLine("\nWelcome to the Custom Level File Generator!");
+                        Console.WriteLine("Enter the names of your levels below. When you are done, enter a blank line. \n(NOTE: THIS WILL OVERWRITE PREEXISTING LEVELINFO FILES IN THE LEVELS DIRECTORY)");
+                        Console.Write("> ");
+                        levelManager = new LevelManager("levels\\info.wal");
+
+                        string customLevelInfo = Console.ReadLine().Trim();
+
+                        //Check if exit case
+                        if(customLevelInfo == "")
+                        {
+                            break;
+                        }
+
+                        string currentLevelName;
+
+                        do
+                        {
+                            Console.Write("> ");
+                            currentLevelName = Console.ReadLine().Trim();
+
+                            //Check if exit case
+                            if (currentLevelName != "")
+                            {
+                                customLevelInfo += "," + currentLevelName;
+                            }
+                        }
+                        while (currentLevelName != "");
+
+                        if (levelManager.SaveCustomInfo(customLevelInfo))
+                        {
+                            Console.WriteLine("File successfully saved!");
+                        }
+
+                        break;
                 }
 
             }
@@ -202,13 +240,14 @@ namespace NotSoSimpleLevelDesigner
             //Display key to user
             Console.WriteLine("\nKey:\n\n" +
                 "W - Wall Editor\n" +
-                "I - Invis Wall Editor\n" +
+                "B - Bullet Only Wall Editor\n" +
                 "M - Mirror Editor\n" +
                 "H - Homing Enemy Editor\n" +
                 "E - Ensconcing Enemy Editor\n" +
                 "P - Player Editor\n" +
                 "G - Toggle Grid\n" +
-                "S - Save");
+                "S - Save\n" +
+                "Arrow Keys - Move Level");
 
             //Flavor
             Console.WriteLine("Entering Wall editor");
@@ -259,16 +298,96 @@ namespace NotSoSimpleLevelDesigner
                 
             }
 
+            //Check whether to move left, and if possible
+            if (IsValidKeypress(Keys.Left) && level[0, 0] == '0' && level[level.GetLength(0) - 1, 0] == '0' && level[((int)level.GetLength(0) - 1) / 2, 0] == '0')
+            {
+                char[,] tempArray = new char[level.GetLength(0), level.GetLength(1) - 1];
+
+                for(int i = 0; i < rows; i++)
+                {
+                    for (int j = 1; j < columns; j++)
+                    {
+                        tempArray[i, j - 1] = level[i, j];
+                    }
+                }
+                columns--;
+                maxMouse = new Point(columns * tileSize, rows * tileSize);
+                level = tempArray;
+            }
+
+            //Check whether to move right, and if possible
+            //TODO: fix bug where you can move it off the screen
+            if (IsValidKeypress(Keys.Right))
+            {
+                char[,] tempArray = new char[level.GetLength(0), level.GetLength(1) + 1];
+
+                for(int i = 0; i < rows; i++)
+                {
+                    tempArray[i, 0] = '0';
+                }
+
+                for (int i = 0; i < rows; i++)
+                {
+                    for (int j = 1; j < columns + 1; j++)
+                    {
+                        tempArray[i, j] = level[i, j - 1];
+                    }
+                }
+                columns++;
+                maxMouse = new Point(columns * tileSize, rows * tileSize);
+                level = tempArray;
+            }
+
+            //Check whether to move up, and if possible
+            if (IsValidKeypress(Keys.Up) && level[0, 0] == '0' && level[0, level.GetLength(1) - 1] == '0' && level[0, ((int)level.GetLength(1) - 1) / 2] == '0')
+            {
+                char[,] tempArray = new char[level.GetLength(0) - 1, level.GetLength(1)];
+
+                for (int i = 1; i < rows; i++)
+                {
+                    for (int j = 0; j < columns; j++)
+                    {
+                        tempArray[i - 1, j] = level[i, j];
+                    }
+                }
+                rows--;
+                maxMouse = new Point(columns * tileSize, rows * tileSize);
+                level = tempArray;
+            }
+
+            //Check whether to move down, and if possible
+            //TODO: fix bug where you can move it off the screen
+            if (IsValidKeypress(Keys.Down))
+            {
+                char[,] tempArray = new char[level.GetLength(0) + 1, level.GetLength(1)];
+
+                for (int j = 0; j < columns; j++)
+                {
+                    tempArray[0, j] = '0';
+                }
+
+                for (int i = 1; i < rows + 1; i++)
+                {
+                    for (int j = 0; j < columns; j++)
+                    {
+                        tempArray[i, j] = level[i - 1, j];
+                    }
+                }
+                rows++;
+                maxMouse = new Point(columns * tileSize, rows * tileSize);
+                level = tempArray;
+            }
+
             //FSM for EditorState
             switch (editorState)
             {
                 case EditorState.Walls:
 
                     //Change state
-                    if (IsValidKeypress(Keys.I))
+                    if (IsValidKeypress(Keys.B))
                     {
-                        Console.WriteLine("Entering Invisible Wall editor");
-                        editorState = EditorState.InvisibleWalls;
+                        Console.WriteLine("Entering B.O.W. editor");
+                        editorState = EditorState.bulletOnlyWalls;
                     }
                     if (IsValidKeypress(Keys.M))
                     {
@@ -293,7 +412,7 @@ namespace NotSoSimpleLevelDesigner
                     HandleMouseInput('W');
                     break;
 
-                case EditorState.InvisibleWalls:
+                case EditorState.bulletOnlyWalls:
 
                     //Change state
                     if (IsValidKeypress(Keys.W))
@@ -321,7 +440,7 @@ namespace NotSoSimpleLevelDesigner
                         Console.WriteLine("Entering Player editor");
                         editorState = EditorState.Player;
                     }
-                    HandleMouseInput('I');
+                    HandleMouseInput('B');
                     break;
 
                 case EditorState.Mirrors:
@@ -332,10 +451,10 @@ namespace NotSoSimpleLevelDesigner
                         Console.WriteLine("Entering Wall editor");
                         editorState = EditorState.Walls;
                     }
-                    if (IsValidKeypress(Keys.I))
+                    if (IsValidKeypress(Keys.B))
                     {
-                        Console.WriteLine("Entering Invisible Wall editor");
-                        editorState = EditorState.InvisibleWalls;
+                        Console.WriteLine("Entering B.O.W. editor");
+                        editorState = EditorState.bulletOnlyWalls;
                     }
                     if (IsValidKeypress(Keys.E))
                     {
@@ -363,10 +482,10 @@ namespace NotSoSimpleLevelDesigner
                         Console.WriteLine("Entering Wall editor");
                         editorState = EditorState.Walls;
                     }
-                    if (IsValidKeypress(Keys.I))
+                    if (IsValidKeypress(Keys.B))
                     {
-                        Console.WriteLine("Entering Invisible Wall editor");
-                        editorState = EditorState.InvisibleWalls;
+                        Console.WriteLine("Entering B.O.W. editor");
+                        editorState = EditorState.bulletOnlyWalls;
                     }
                     if (IsValidKeypress(Keys.H))
                     {
@@ -394,10 +513,10 @@ namespace NotSoSimpleLevelDesigner
                         Console.WriteLine("Entering Wall editor");
                         editorState = EditorState.Walls;
                     }
-                    if (IsValidKeypress(Keys.I))
+                    if (IsValidKeypress(Keys.B))
                     {
-                        Console.WriteLine("Entering Invisible Wall editor");
-                        editorState = EditorState.InvisibleWalls;
+                        Console.WriteLine("Entering B.O.W. editor");
+                        editorState = EditorState.bulletOnlyWalls;
                     }
                     if (IsValidKeypress(Keys.M))
                     {
@@ -425,10 +544,10 @@ namespace NotSoSimpleLevelDesigner
                         Console.WriteLine("Entering Wall editor");
                         editorState = EditorState.Walls;
                     }
-                    if (IsValidKeypress(Keys.I))
+                    if (IsValidKeypress(Keys.B))
                     {
-                        Console.WriteLine("Entering Invisible Wall editor");
-                        editorState = EditorState.InvisibleWalls;
+                        Console.WriteLine("Entering B.O.W. editor");
+                        editorState = EditorState.bulletOnlyWalls;
                     }
                     if (IsValidKeypress(Keys.M))
                     {
@@ -474,7 +593,7 @@ namespace NotSoSimpleLevelDesigner
                             _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.Purple);
                             break;
 
-                        case 'I':
+                        case 'B':
                             _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.Blue);
                             break;
 
