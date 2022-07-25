@@ -586,7 +586,7 @@ namespace NotSoSimpleLevelDesigner
                     switch (level[i, j])
                     {
                         case 'W':
-                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.White);
+                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.Red);
                             break;
 
                         case 'P':
@@ -594,11 +594,11 @@ namespace NotSoSimpleLevelDesigner
                             break;
 
                         case 'B':
-                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.Blue);
+                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.Yellow);
                             break;
 
                         case 'M':
-                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.Green);
+                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.White);
                             break;
 
                         case 'E':
@@ -606,7 +606,7 @@ namespace NotSoSimpleLevelDesigner
                             break;
                         
                         case 'H':
-                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.DarkRed);
+                            _spriteBatch.Draw(gameObjectTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.Blue);
                             break;
                     }
 
@@ -614,7 +614,7 @@ namespace NotSoSimpleLevelDesigner
                     if (hasGrid)
                     {
                         //For some reason this won't draw if the tileSize isn't 16, but everthing else does i feel like I'm going insane
-                        _spriteBatch.Draw(gridTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.White);
+                        _spriteBatch.Draw(gridTexture, new Rectangle(j * tileSize, i * tileSize, tileSize, tileSize), Color.Gray);
                     }
                 }
             }
